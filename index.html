@@ -184,13 +184,14 @@
     };
 
     var createInfo = function(){
-        console.log(geo);
+        var zoom = map.getZoom();
+        console.log(zoom);
         var title = $("#title").val().replace(/'/ig,"\\'");
         var width = $("#width").val();
         var height = $("#height").val();
         var html = [];
         html.push("<a target='_blank' title='"+title+"' href='https://www.google.com.tw/maps/place/"+geo.lat+","+geo.lng+"'>");
-        html.push("    <img alt='"+title+"' title='"+title+"' src='http://maps.googleapis.com/maps/api/staticmap?center="+geo.lat+","+geo.lng+"&zoom=13&size="+width+"x"+height+"&markers=color:blue%7C"+geo.lat+","+geo.lng+"'>");
+        html.push("    <img alt='"+title+"' title='"+title+"' src='http://maps.googleapis.com/maps/api/staticmap?center="+geo.lat+","+geo.lng+"&zoom="+zoom+"&size="+width+"x"+height+"&markers=color:blue%7C"+geo.lat+","+geo.lng+"'>");
         html.push("</a>");
 
         html = html.join("\n");
