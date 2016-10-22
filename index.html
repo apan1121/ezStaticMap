@@ -5,6 +5,10 @@
     <title>產生 Google 地圖</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
+    <meta name="viewport" content="user-scalable=0">
+    <meta name="viewport" content="user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link rel="icon" href="favicon-map.ico" type="image/x-icon" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
@@ -152,9 +156,12 @@
                 };
                 setMarker(geo);
             }, function() {
+                alert("無法取得你的位置");
+                $("#getNowPostion").remove();
                 that.handleLocationError(true, infoWindow, map.getCenter());
             });
         } else {
+            alert(3);
             // Browser doesn't support Geolocation
             that.handleLocationError(false, infoWindow, map.getCenter());
         }
@@ -195,9 +202,10 @@
         var width = $("#width").val();
         var height = $("#height").val();
         var html = [];
-        // html.push("<a target='_blank' title='"+title+"' href='https://www.google.com.tw/maps/place/"+geo.lat+","+geo.lng+"'>");
-        html.push("    <img alt='"+title+"' title='"+title+"' src='http://maps.googleapis.com/maps/api/staticmap?center="+geo.lat+","+geo.lng+"&zoom="+zoom+"&size="+width+"x"+height+"&markers=color:blue%7C"+geo.lat+","+geo.lng+"'>");
-        // html.push("</a>");
+        html.push("<a target='_blank' title='"+title+"' href='https://www.google.com.tw/maps/place/"+geo.lat+","+geo.lng+"'>");
+        var src = "http://maps.googleapis.com/maps/api/staticmap?center="+geo.lat+","+geo.lng+"&zoom=14&size="+width+"x"+height+"&markers=color:blue%7C"+geo.lat+","+geo.lng+"";
+        html.push("<img src='"+src+"'>");
+        html.push("</a>");
 
         html = html.join("\n");
 
