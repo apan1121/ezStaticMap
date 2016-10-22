@@ -158,6 +158,7 @@
             }, function() {
                 alert("無法取得你的位置");
                 $("#getNowPostion").remove();
+                $("#makeMap").hide();
                 that.handleLocationError(true, infoWindow, map.getCenter());
             });
         } else {
@@ -194,6 +195,7 @@
             alert("Geocode was not successful for the following reason: " + status);
           }
         });
+        $("#makeMap").show();
     };
 
     var createInfo = function(){
