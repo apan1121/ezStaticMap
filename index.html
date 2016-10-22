@@ -98,6 +98,12 @@
                         </div>
                         <div class="col-md-12">
                             <div class="form-group">
+                                <label for="zoom">縮放</label>
+                                <input type="number" class="form-control" id="zoom" placeholder="數字" value="13" min=1 max=20>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
                                 <label for="width">寬</label>
                                 <input type="number" class="form-control" id="width" placeholder="數字" value="300">
                             </div>
@@ -184,8 +190,7 @@
     };
 
     var createInfo = function(){
-        var zoom = map.getZoom();
-        console.log(zoom);
+        var zoom = $("#zoom").val();
         var title = $("#title").val().replace(/'/ig,"\\'");
         var width = $("#width").val();
         var height = $("#height").val();
@@ -259,6 +264,7 @@
 
         $("#makeMap").bind("click", function() {
             $("#title").val(addressStr);
+            $("#zoom").val(map.getZoom());
             $("#MapModal").modal("show");
             $("#title,#width,#height").unbind("change").bind("change",function(){
                 createInfo();
