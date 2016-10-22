@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>產生 Google 地圖</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="icon" href="favicon-map.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+
+    <style>
+    html,
+    body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .mapBox {
+        position: relative;
+        height: 100%;
+    }
+
+    .mapBox .searchBox {
+        position: absolute;
+        top: 8px;
+        right: 5px;
+        width: 60vw;
+        text-align: right;
+    }
+
+    .mapBox #address {
+        margin-bottom: 5px;
+    }
+
+    .mapBox #getNowPostion {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        font-size: 15px;
+        background: #ec971f;
+        border-color: #d58512;
+        text-align: center;
+        line-height: 30px;
+        border-radius: 5px;
+        bottom: 5px;
+        left: 5px;
+        cursor: pointer;
+    }
+
+    .mapBox #getNowPostion:hover {
+        background: #fbbe68;
+        border-color: #d58512;
+    }
+
+    .mapBox #getNowPostion:active {
+        background: #cc8727;
+        border-color: #d58512;
+    }
+
+    #map {
+        height: 100%;
+    }
+
+    .modal-dialog {
+        margin: 0px auto;
+    }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="mapBox">
+        <div id="map"></div>
+        <div class="searchBox">
+            <input type="text" class="form-control" id="address" placeholder="搜尋地址">
+            <input type="button" class="btn btn-success" id="makeMap" value="建立圖片">
+        </div>
+        <div id="getNowPostion"><i class="fa fa-map-marker" aria-hidden="true"></i></div>
+    </div>
+    <div id="MapModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">產生地圖圖檔</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="title">圖片名稱</label>
+                                <input type="text" class="form-control" id="title" placeholder="輸入圖片的名稱" value="">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="width">寬</label>
+                                <input type="number" class="form-control" id="width" placeholder="數字" value="300">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="height">高</label>
+                                <input type="number" class="form-control" id="height" placeholder="數字" value="300">
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="height">原始碼</label>
+                                <textarea class="form-control" id="source_code"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div>
+                                預覽
+                            </div>
+                            <div class="preview">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal-content -->
+        </div>
+        <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+    <script>
+    var geo = {
+        lat: null,
+        lng: null
+    };
+    var addressStr = "";
+    var map = null;
+    var geocoder = null;
+    var getNowGeo = function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                geo = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                setMarker(geo);
+            }, function() {
+                that.handleLocationError(true, infoWindow, map.getCenter());
+            });
+        } else {
+            // Browser doesn't support Geolocation
+            that.handleLocationError(false, infoWindow, map.getCenter());
+        }
+    };
+
+    var marker = null;
+
+    var setMarker = function(geo) {
+        if (marker == null) {
+            marker = new google.maps.Marker({
+                position: {
+                    lat: -25.363,
+                    lng: 131.044
+                },
+                map: map,
+                title: 'Here'
+            });
+        }
+        geo.lat = Math.round(geo.lat*100000)/100000;
+        geo.lng = Math.round(geo.lng*100000)/100000;
+
+        marker.setPosition(geo);
+        map.setCenter(geo);
+        map.setZoom(13);
+
+        geocoder.geocode( { 'location': geo}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            addressStr = results[0].formatted_address;
+          } else {
+            alert("Geocode was not successful for the following reason: " + status);
+          }
+        });
+    };
+
+    var createInfo = function(){
+        console.log(geo);
+        var title = $("#title").val().replace(/'/ig,"\\'");
+        var width = $("#width").val();
+        var height = $("#height").val();
+        var html = [];
+        html.push("<a target='_blank' title='"+title+"' href='https://www.google.com.tw/maps/place/"+geo.lat+","+geo.lng+"'>");
+        html.push("    <img alt='"+title+"' title='"+title+"' src='http://maps.googleapis.com/maps/api/staticmap?center="+geo.lat+","+geo.lng+"&zoom=13&size="+width+"x"+height+"&markers=color:blue%7C"+geo.lat+","+geo.lng+"'>");
+        html.push("</a>");
+
+        html = html.join("\n");
+
+        $(".preview").html(html);
+        $("#source_code").val(html);
+    }
+
+    function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 4,
+            center: {
+                lat: -25.363,
+                lng: 131.044
+            }
+        });
+        geocoder = new google.maps.Geocoder();
+
+        map.addListener('click', function(event) {
+            geo.lat = event.latLng.lat();
+            geo.lng = event.latLng.lng();
+            setMarker(geo);
+        });
+
+
+        var searchBox = new google.maps.places.SearchBox($("#address")[0]);
+        searchBox.addListener('places_changed', function() {
+            var places = searchBox.getPlaces();
+            if (places.length == 0) {
+                return;
+            }
+            geo.lat = places[0].geometry.location.lat();
+            geo.lng = places[0].geometry.location.lng();
+            setMarker(geo);
+        });
+
+
+        $("#getNowPostion").bind("click", function() {
+            $("#address").val("");
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    geo = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    setMarker(geo);
+                }, function() {
+                    that.handleLocationError(true, infoWindow, map.getCenter());
+                });
+            } else {
+                // Browser doesn't support Geolocation
+                that.handleLocationError(false, infoWindow, map.getCenter());
+            }
+        });
+
+        $("#search").bind("click", function() {
+
+            if (geo.lat != null && geo.lng != null) {
+                console.log(geo);
+            } else {
+                $("#alert .message").html("請輸入選擇地址 或 取得目前位置");
+                $("#alert").modal('show');
+            }
+        });
+
+        $("#makeMap").bind("click", function() {
+            $("#title").val(addressStr);
+            $("#MapModal").modal("show");
+            $("#title,#width,#height").unbind("change").bind("change",function(){
+                createInfo();
+            });
+            $("#source_code").unbind("click").bind("click",function(){
+                this.select();
+            });
+            createInfo();
+        });
+
+        getNowGeo();
+    }
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDLHzzTq7wMEJoBH4n_c1Vv-t3ymus7oUk&signed_in=false&callback=initMap" async defer/>
+    </script>
+</body>
+
+</html>
