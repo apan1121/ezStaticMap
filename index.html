@@ -186,7 +186,7 @@
 
         marker.setPosition(geo);
         map.setCenter(geo);
-        map.setZoom(13);
+        // map.setZoom(13);
 
         geocoder.geocode( { 'location': geo}, function(results, status) {
           if (status == google.maps.GeocoderStatus.OK) {
